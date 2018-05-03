@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { PinCheck } from '@ionic-native/pin-check';
-declare let IRoot: any;
+import AeroGearSecurity from '@aerogear/security';
+
 declare let device: any;
 declare let cordova: any;
 
@@ -15,12 +16,14 @@ export class DeviceTrustPage {
   trustScore: number;
   totalTests: number;
   totalDetections: number;
+  securityService: AeroGearSecurity;
 
   constructor(public navCtrl: NavController, private pinCheck: PinCheck) {
     this.detections = [];
     this.trustScore = 0.0;
     this.totalTests = 0;
     this.totalDetections = 0;
+    this.securityService = new AeroGearSecurity();
   }
 
   performChecks() {
@@ -61,7 +64,7 @@ export class DeviceTrustPage {
   */
   detectRoot(): void {
     var self = this;
-      IRoot.isRooted(function(rooted) { 
+    this.securityService.isRooted(function(rooted) { 
         if(rooted) {
           self.addDetection("Root Access Detected", true);
         } else {
