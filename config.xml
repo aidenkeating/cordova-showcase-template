@@ -86,4 +86,5 @@
     <plugin name="cordova-plugin-sslcertificatechecker" spec="^5.1.0" />
     <engine name="ios" spec="4.5.4" />
     <engine name="android" spec="~7.0.0" />
+    <plugin name="cordova-plugin-aerogear-device-trust" spec="/Users/aidenkeating/work/aerogear-js-sdk/packages/security-cordova" />
 </widget>
