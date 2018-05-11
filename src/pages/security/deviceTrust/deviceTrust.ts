@@ -1,8 +1,12 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { SecurityService, SecurityCheckType, SecurityCheckResult } from '@aerogear/security';
+import { MetricsService } from '@aerogear/core';
 
 declare let device: any;
+declare let require: any;
+let appConfig = require("../../../mobile-services.json");
+
 
 @Component({
   selector: 'page-deviceTrust',
@@ -14,6 +18,7 @@ export class DeviceTrustPage {
   totalTests: number;
   totalDetections: number;
   securityService: SecurityService;
+  metricsService: MetricsService;
 
   constructor(public navCtrl: NavController) {
     this.detections = [];
@@ -21,6 +26,7 @@ export class DeviceTrustPage {
     this.totalTests = 0;
     this.totalDetections = 0;
     this.securityService = new SecurityService();
+    this.metricsService = new MetricsService(appConfig);
   }
 
   performChecks() {
@@ -28,7 +34,7 @@ export class DeviceTrustPage {
     this.detectEmulator();
     this.detectDebug();
     this.detectLatestOS();
-    this.detectDeviceLock();
+    //this.detectDeviceLock();
   }
 
   addDetection(label: string, detected: boolean) {
@@ -64,7 +70,10 @@ export class DeviceTrustPage {
     .then((isRooted: SecurityCheckResult) => {
       const rootedMsg = isRooted.passed ? "Root Access Detected" : "Root Access Not Detected";
       this.addDetection(rootedMsg, isRooted.passed);
-    }).catch((err: Error) => console.log(err));
+      return isRooted;
+    })
+    .then((result) => this.securityService.publishCheckResultMetrics([result], this.metricsService))
+    .catch((err: Error) => console.log(err));
   }
   // end::detectRoot[]
 
@@ -111,13 +120,13 @@ export class DeviceTrustPage {
   /**
   * Detect if a system device lock is set.
   */
-  detectDeviceLock() {
-    this.securityService.check(SecurityCheckType.hasDeviceLock)
-    .then((isLocked: SecurityCheckResult) => {
-      const lockMsg = isLocked.passed ? "Device Lock Detected" : "Device Lock Not Detected";
-      this.addDetection(lockMsg, isLocked.passed);
-    }).catch((err: Error) => console.log(err));
-  }
+  // detectDeviceLock() {
+  //   this.securityService.check(SecurityCheckType.hasDeviceLock)
+  //   .then((isLocked: SecurityCheckResult) => {
+  //     const lockMsg = isLocked.passed ? "Device Lock Detected" : "Device Lock Not Detected";
+  //     this.addDetection(lockMsg, isLocked.passed);
+  //   }).catch((err: Error) => console.log(err));
+  // }
   // end::detectDeviceLock[]
 
   ionViewDidEnter(): void {
