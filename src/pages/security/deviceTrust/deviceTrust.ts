@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
-import { SecurityService, SecurityCheckType, SecurityCheckResult } from '@aerogear/security';
+import { SecurityService, SecurityCheck, SecurityCheckType, SecurityCheckResult } from '@aerogear/security';
 import { SecurityCheckResultMetric } from '@aerogear/security';
 
 declare let device: any;
@@ -59,7 +59,7 @@ export class DeviceTrustPage {
       .then((isEmulated: SecurityCheckResult) => {
         const emulatedMsg = isEmulated.passed ? "Emulator Not Detected" : "Emulator Detected";
         this.addDetection(emulatedMsg, isEmulated.passed)
-      }).catch((err: Error) => console.log(err));
+      }).catch((err: Error) => this.displayCheckError(SecurityCheckType.notEmulated, err));
   }
   // end::detectEmulator[]
 
@@ -72,7 +72,7 @@ export class DeviceTrustPage {
       .then((isRooted: SecurityCheckResult) => {
         const rootedMsg = isRooted.passed ? "Root Access Not Detected" : "Root Access Detected";
         this.addDetection(rootedMsg, isRooted.passed);
-      }).catch((err: Error) => console.log(err));
+      }).catch((err: Error) => this.displayCheckError(SecurityCheckType.notRooted, err));
   }
   // end::detectRoot[]
 
@@ -85,7 +85,7 @@ export class DeviceTrustPage {
       .then((isDebugger: SecurityCheckResult) => {
         const debuggerMsg = isDebugger.passed ? "Debug Mode Not Detected" : "Debug Mode Detected";
         this.addDetection(debuggerMsg, isDebugger.passed);
-      }).catch((err: Error) => console.log(err));
+      }).catch((err: Error) => this.displayCheckError(SecurityCheckType.notDebugMode, err));
   }
   // end::detectDebug[]
 
@@ -124,7 +124,7 @@ export class DeviceTrustPage {
       .then((deviceLockEnabled: SecurityCheckResult) => {
         const deviceLockMsg = deviceLockEnabled.passed ? "Device Lock Detected" : "Device Lock Not Detected";
         this.addDetection(deviceLockMsg, deviceLockEnabled.passed);
-      });
+      }).catch((err: Error) => this.displayCheckError(SecurityCheckType.hasDeviceLock, err));
   }
   // end::detectDeviceLock[]
 
@@ -143,4 +143,11 @@ export class DeviceTrustPage {
       }).present());
   }
 
+  private displayCheckError(check: SecurityCheck, err: Error): void {
+    this.toastCtrl.create({
+      message: `Error running check ${check.name}: ${err.message}`,
+      duration: 3000,
+      dismissOnPageChange: true
+    }).present();
+  }
 }
